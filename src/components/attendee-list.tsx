@@ -6,6 +6,8 @@ import {
   MoreHorizontal,
   Search,
 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale/pt-BR";
 import { IconButton } from "./icon-button";
 import { Table } from "./table/table";
 import { TableHeader } from "./table/table-header";
@@ -65,8 +67,18 @@ export function AttendeeList() {
                     <span>{attendee.email}</span>
                   </div>
                 </TableCell>
-                <TableCell>{attendee.createdAt.toISOString()}</TableCell>
-                <TableCell>{attendee.checkedInAt.toISOString()}</TableCell>
+                <TableCell>
+                  {formatDistanceToNow(attendee.createdAt, {
+                    locale: ptBR,
+                    addSuffix: true,
+                  })}
+                </TableCell>
+                <TableCell>
+                  {formatDistanceToNow(attendee.checkedInAt, {
+                    locale: ptBR,
+                    addSuffix: true,
+                  })}
+                </TableCell>
                 <TableCell>
                   <IconButton transparent>
                     <MoreHorizontal className="size-4" />
