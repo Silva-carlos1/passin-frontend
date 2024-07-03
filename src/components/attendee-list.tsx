@@ -13,28 +13,47 @@ import { Table } from "./table/table";
 import { TableHeader } from "./table/table-header";
 import { TableCell } from "./table/table-cell";
 import { TableRow } from "./table/table-row";
-import { attendees } from "../data/attendees";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+interface Attendee {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  checkedInAt: string | null;
+}
 
 export function AttendeeList() {
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(0);
 
-  const totalPages = Math.ceil((attendees.length / 10))
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+
+  useEffect(() => {
+    fetch(
+      "http://localhost:3333/events/fb5b7097-0270-4ec2-aa6f-16ddb8bbad59/attendees"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setAttendees(data.attendees);
+      });
+  }, [page]);
+
+  const totalPages = Math.ceil(attendees.length / 10);
 
   function goToFirstPage() {
-    setPage(0)
+    setPage(0);
   }
 
   function goToLastPage() {
-    setPage(totalPages - 1)
+    setPage(totalPages - 1);
   }
 
   function goToNextPage() {
-    setPage(page + 1)
+    setPage(page + 1);
   }
 
   function goToPreviousPage() {
-    setPage(page - 1)
+    setPage(page - 1);
   }
 
   return (
@@ -95,10 +114,14 @@ export function AttendeeList() {
                   })}
                 </TableCell>
                 <TableCell>
-                  {formatDistanceToNow(attendee.checkedInAt, {
-                    locale: ptBR,
-                    addSuffix: true,
-                  })}
+                  {attendee.checkedInAt === null ? (
+                    <span className="text-zinc-400">Não fez check-in</span>
+                  ) : (
+                    formatDistanceToNow(attendee.checkedInAt, {
+                      locale: ptBR,
+                      addSuffix: true,
+                    })
+                  )}
                 </TableCell>
                 <TableCell>
                   <IconButton transparent>
@@ -111,10 +134,14 @@ export function AttendeeList() {
         </tbody>
         <tfoot>
           <TableRow>
-            <TableCell colSpan={3}>Mostrando 10 de {attendees.length} itens</TableCell>
+            <TableCell colSpan={3}>
+              Mostrando 10 de {attendees.length} itens
+            </TableCell>
             <TableCell className="text-right" colSpan={3}>
               <div className="inline-flex items-center gap-8">
-                <span>Página {page + 1} de {totalPages}</span>
+                <span>
+                  Página {page + 1} de {totalPages}
+                </span>
 
                 <div className="flex gap-1.5">
                   <IconButton onClick={goToFirstPage} disabled={page === 0}>
@@ -123,10 +150,16 @@ export function AttendeeList() {
                   <IconButton onClick={goToPreviousPage} disabled={page === 0}>
                     <ChevronLeft className="size-4" />
                   </IconButton>
-                  <IconButton onClick={goToNextPage} disabled={page === totalPages - 1}>
+                  <IconButton
+                    onClick={goToNextPage}
+                    disabled={page === totalPages - 1}
+                  >
                     <ChevronRight className="size-4" />
                   </IconButton>
-                  <IconButton onClick={goToLastPage} disabled={page === totalPages - 1}>
+                  <IconButton
+                    onClick={goToLastPage}
+                    disabled={page === totalPages - 1}
+                  >
                     <ChevronsRight className="size-4" />
                   </IconButton>
                 </div>
