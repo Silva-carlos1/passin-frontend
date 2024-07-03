@@ -24,8 +24,21 @@ interface Attendee {
 }
 
 export function AttendeeList() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState(() => {
+    const url = new URL(window.location.toString());
+
+    return url.searchParams.has("search")
+      ? url.searchParams.get("search") ?? ""
+      : "";
+  });
+
+  const [page, setPage] = useState(() => {
+    const url = new URL(window.location.toString());
+
+    return url.searchParams.has("page")
+      ? Number(url.searchParams.get("page"))
+      : 0;
+  });
 
   const [total, setTotal] = useState(0);
   const [attendees, setAttendees] = useState<Attendee[]>([]);
@@ -52,25 +65,45 @@ export function AttendeeList() {
       });
   }, [page, search]);
 
+  function setCurrentSearch(search: string) {
+    const url = new URL(window.location.toString());
+
+    url.searchParams.set("search", search);
+
+    window.history.pushState({}, "", url);
+
+    setSearch(search);
+  }
+
+  function setCurrentPage(page: number) {
+    const url = new URL(window.location.toString());
+
+    url.searchParams.set("page", String(page));
+
+    window.history.pushState({}, "", url);
+
+    setPage(page);
+  }
+
   function onSearchInputChanged(event: ChangeEvent<HTMLInputElement>) {
-    setSearch(event.target.value);
-    setPage(0);
+    setCurrentSearch(event.target.value);
+    setCurrentPage(0);
   }
 
   function goToFirstPage() {
-    setPage(0);
+    setCurrentPage(0);
   }
 
   function goToLastPage() {
-    setPage(totalPages - 1);
+    setCurrentPage(totalPages - 1);
   }
 
   function goToNextPage() {
-    setPage(page + 1);
+    setCurrentPage(page + 1);
   }
 
   function goToPreviousPage() {
-    setPage(page - 1);
+    setCurrentPage(page - 1);
   }
 
   return (
