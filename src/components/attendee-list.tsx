@@ -26,19 +26,27 @@ interface Attendee {
 export function AttendeeList() {
   const [page, setPage] = useState(0);
 
+  const [total, setTotal] = useState(0);
   const [attendees, setAttendees] = useState<Attendee[]>([]);
 
+  const totalPages = Math.ceil(total / 10);
+
   useEffect(() => {
-    fetch(
+    const url = new URL(
       "http://localhost:3333/events/fb5b7097-0270-4ec2-aa6f-16ddb8bbad59/attendees"
-    )
+    );
+
+    url.searchParams.set("pageIndex", String(page));
+    url.searchParams.set("query", "Anna");
+
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
         setAttendees(data.attendees);
+        setTotal(data.total);
+        console.log("refresh");
       });
   }, [page]);
-
-  const totalPages = Math.ceil(attendees.length / 10);
 
   function goToFirstPage() {
     setPage(0);
@@ -86,7 +94,7 @@ export function AttendeeList() {
           </tr>
         </thead>
         <tbody>
-          {attendees.slice(page * 10, (page + 1) * 10).map((attendee) => {
+          {attendees.map((attendee) => {
             return (
               <TableRow
                 key={attendee.id}
@@ -134,9 +142,7 @@ export function AttendeeList() {
         </tbody>
         <tfoot>
           <TableRow>
-            <TableCell colSpan={3}>
-              Mostrando 10 de {attendees.length} itens
-            </TableCell>
+            <TableCell colSpan={3}>Mostrando 10 de {total} itens</TableCell>
             <TableCell className="text-right" colSpan={3}>
               <div className="inline-flex items-center gap-8">
                 <span>
